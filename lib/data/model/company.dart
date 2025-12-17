@@ -8,12 +8,14 @@ class Company extends User {
     required String name,
     required String email,
     required String phone,
+    required String password,
     required this.companyName,
   }) : super(
           id: id,
           name: name,
           email: email,
           phone: phone,
+          password: password,
           role: "company",
         );
 }

@@ -1,4 +1,4 @@
-import '../../../data/model/user.dart';
+import '/data/model/user.dart';
 
 class UserRepository {
   static final UserRepository _instance = UserRepository._internal();
@@ -7,18 +7,24 @@ class UserRepository {
 
   final List<User> _users = [];
 
-  // Null-safe lookup
-  User? getUserById(String id) {
+  void addUser(User user) {
+    _users.add(user);
+  }
+
+  User? getUserById(String? id) {
+    if (id == null) return null;
     try {
       return _users.firstWhere((u) => u.id == id);
-    } catch (e) {
+    } catch (_) {
       return null;
     }
   }
 
-  void addUser(User user) {
-    // Avoid duplicate users
-    if (_users.any((u) => u.id == user.id)) return;
-    _users.add(user);
+  User? getUserByEmail(String email) {
+    try {
+      return _users.firstWhere((u) => u.email == email);
+    } catch (_) {
+      return null;
+    }
   }
 }

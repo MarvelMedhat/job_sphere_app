@@ -1,5 +1,6 @@
 import '../../patterns/factory/user_factory.dart';
 import '../../patterns/singleton/auth_service.dart';
+import '../../patterns/singleton/UserRepository.dart';
 import '../../../data/model/user.dart';
 
 class AuthFacade {
@@ -7,21 +8,28 @@ class AuthFacade {
 
   /// Login existing user
   void login({
-    required String role,
-    required String id,
-    required String email,
-    required String password, required String name,
-  }) {
-    // For demo, create a user object with minimal info
-    User user = UserFactory.createUser(
-      role: role,
-      id: id,
-      email: email,
-      name: '', // name can be fetched from stored user DB if needed
-      password: password, phone: '',
-    );
-    _authService.login(user);
+  required String role,
+  required String email,
+  required String password,
+}) {
+  final existingUser =
+      UserRepository.instance.getUserByEmail(email);
+
+  // ❌ NOT REGISTERED
+  if (existingUser == null) {
+    throw Exception("User not registered");
   }
+
+  // ❌ WRONG ROLE
+  if (existingUser.role != role) {
+    throw Exception("Role mismatch");
+  }
+
+ 
+
+  // ✅ LOGIN SUCCESS
+  _authService.login(existingUser);
+}
 
   /// Register new user
   void register({
@@ -40,30 +48,18 @@ class AuthFacade {
       password: password,
       phone: phone,
     );
+
     _authService.register(user);
+
+    // ✅ SAVE USER
+    UserRepository.instance.addUser(user);
   }
 
-  /// Get currently logged-in user
   User? getCurrentUser() => _authService.currentUser;
 
-  /// Logout
   void logout() {
     _authService.logout();
   }
 
-  void saveJobToProfile(String jobId) {
-    final user = _authService.currentUser;
-    if (user != null && !user.savedJobs.contains(jobId)) {
-      user.savedJobs.add(jobId);
-    }
-  }
-
-  void updateProfile({String? name, String? email, String? phone}) {
-    final user = _authService.currentUser;
-    if (user != null) {
-      user.name = name ?? user.name;
-      user.email = email ?? user.email;
-      user.phone = phone ?? user.phone;
-    }
-  }
+  void updateProfile({required String name, required String email, required String phone}) {}
 }

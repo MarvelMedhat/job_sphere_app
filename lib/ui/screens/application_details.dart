@@ -167,16 +167,16 @@ class _ApplicationDetailsScreenState extends State<ApplicationDetailsScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "Name: ${applicant?.name ?? 'Unknown'}",
+                            "Name: ${applicant?.name}",
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 18,
                             ),
                           ),
                           const SizedBox(height: 6),
-                          Text("Email: ${applicant?.email ?? 'Unknown'}"),
+                          Text("Email: ${applicant?.email}"),
                           const SizedBox(height: 6),
-                          Text("Phone: ${applicant?.phone ?? 'Unknown'}"),
+                          Text("Phone: ${applicant?.phone}"),
                           const SizedBox(height: 6),
                           Text(
                             "Applied on: ${app.appliedAt.toLocal().toString().split(' ')[0]}",

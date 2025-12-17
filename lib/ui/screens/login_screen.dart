@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import '../../core/patterns/facade/auth_facade.dart';
+import '/features/auth/auth_controller.dart';
 import 'applicant_home.dart';
 import 'company_home.dart';
 import 'register_screen.dart';
+import '../../core/patterns/singleton/UserRepository.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -13,24 +14,35 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final AuthFacade _authFacade = AuthFacade();
+  //final AuthFacade _authFacade = AuthFacade();
 
   final TextEditingController emailController = TextEditingController();
+  
   final TextEditingController passwordController = TextEditingController();
+  final AuthController authController = AuthController(); // or however you initialize it
+
 
   String role = 'applicant';
 
   void login() {
-    if (_formKey.currentState!.validate()) {
-      _authFacade.login(
-        role: role,
-        id: DateTime.now().toString(),
+  if (_formKey.currentState!.validate()) {
+    try {
+      final user = authController.getUserByEmail(emailController.text);
+
+      if (user == null) {
+        throw Exception("User not registered");
+      }
+
+      // Get role from registered user
+      final userRole = user.role;
+
+      authController.login(
+        role: userRole,
         email: emailController.text,
         password: passwordController.text,
-        name: '',
       );
 
-      if (role == 'applicant') {
+      if (userRole == 'applicant') {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => const ApplicantHomeScreen()),
@@ -41,8 +53,15 @@ class _LoginScreenState extends State<LoginScreen> {
           MaterialPageRoute(builder: (_) => const CompanyHomeScreen()),
         );
       }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString())),
+      );
     }
   }
+}
+
+
 
   // Colors
   final Color primaryColor = Colors.deepPurple;
@@ -154,29 +173,6 @@ class _LoginScreenState extends State<LoginScreen> {
                           validator: (value) => value!.length < 6
                               ? "Password min 6 chars"
                               : null,
-                        ),
-                        const SizedBox(height: 16),
-                        DropdownButtonFormField<String>(
-                          value: role,
-                          items: const [
-                            DropdownMenuItem(
-                                value: 'applicant', child: Text("Applicant")),
-                            DropdownMenuItem(
-                                value: 'company', child: Text("Company")),
-                          ],
-                          onChanged: (value) => setState(() => role = value!),
-                          decoration: InputDecoration(
-                            labelText: "Role",
-                            prefixIcon: Icon(Icons.person_outline,
-                                color: primaryColor),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(color: primaryColor),
-                            ),
-                          ),
                         ),
                         const SizedBox(height: 24),
                         SizedBox(

@@ -18,6 +18,7 @@ class UserFactory {
           name: name,
           email: email,
           phone: phone,
+          password: password,
           savedJobs: [], // optional, can be omitted
         );
       case 'company':
@@ -26,6 +27,7 @@ class UserFactory {
           name: name,
           email: email,
           phone: phone,
+          password: password,
           companyName: name,
         );
       default:
