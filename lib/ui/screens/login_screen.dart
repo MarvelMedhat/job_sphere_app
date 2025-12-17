@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '/features/auth/auth_controller.dart';
+import '../../features/auth/auth_controller.dart';
 import 'applicant_home.dart';
 import 'company_home.dart';
 import 'register_screen.dart';

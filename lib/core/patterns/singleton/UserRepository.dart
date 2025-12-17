@@ -1,9 +1,19 @@
-import '/data/model/user.dart';
+import '../../../data/model/user.dart';
 
 class UserRepository {
-  static final UserRepository _instance = UserRepository._internal();
+  // Lazy initialization - instance is null until first access
+  static UserRepository? _instance;
+  
+  // Private constructor
   UserRepository._internal();
-  static UserRepository get instance => _instance;
+  
+  // Lazy initialization getter - creates instance only when first called
+  static UserRepository get instance {
+    if (_instance == null) {
+      _instance = UserRepository._internal();
+    }
+    return _instance!;
+  }
 
   final List<User> _users = [];
 

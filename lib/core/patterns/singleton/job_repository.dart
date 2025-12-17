@@ -1,10 +1,19 @@
 import '../../../data/model/job.dart';
 
 class JobRepository {
-  static final JobRepository _instance = JobRepository._internal();
+  // Lazy initialization - instance is null until first access
+  static JobRepository? _instance;
+  
+  // Private constructor
   JobRepository._internal();
 
-  static JobRepository get instance => _instance;
+  // Lazy initialization getter - creates instance only when first called
+  static JobRepository get instance {
+    if (_instance == null) {
+      _instance = JobRepository._internal();
+    }
+    return _instance!;
+  }
 
   final List<Job> _jobs = [];
 
@@ -15,7 +24,7 @@ class JobRepository {
 
   List<Job> get jobs => _jobs;
 
- void updateJob(Job updatedJob) {
+  void updateJob(Job updatedJob) {
     final index = _jobs.indexWhere((j) => j.id == updatedJob.id);
     if (index != -1) {
       _jobs[index] = updatedJob;
@@ -28,6 +37,5 @@ class JobRepository {
 
   List<Job> getCompanyJobs() {
   return List.unmodifiable(_jobs);
-}
-
+    }
 }

@@ -1,11 +1,19 @@
 import '../../../data/model/job_application.dart';
 
 class ApplicationRepository {
-  static final ApplicationRepository _instance =
-      ApplicationRepository._internal();
+  // Lazy initialization - instance is null until first access
+  static ApplicationRepository? _instance;
 
+  // Private constructor
   ApplicationRepository._internal();
-  static ApplicationRepository get instance => _instance;
+  
+  // Lazy initialization getter - creates instance only when first called
+  static ApplicationRepository get instance {
+    if (_instance == null) {
+      _instance = ApplicationRepository._internal();
+    }
+    return _instance!;
+  }
 
   final List<JobApplication> applications = [];
 

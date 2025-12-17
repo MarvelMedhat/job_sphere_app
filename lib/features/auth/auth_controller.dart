@@ -1,4 +1,4 @@
-import '/core/patterns/singleton/UserRepository.dart';
+import '../../core/patterns/singleton/UserRepository.dart';
 import '../../core/patterns/facade/auth_facade.dart';
 import '../../data/model/user.dart';
 
