@@ -1,37 +1,36 @@
+import 'package:flutter_application_1/core/patterns/singleton/UserRepository.dart';
 import '../../patterns/factory/user_factory.dart';
+import '../../patterns/factory/user_factory_provider.dart';
 import '../../patterns/singleton/auth_service.dart';
-import '../../patterns/singleton/UserRepository.dart';
 import '../../../data/model/user.dart';
 
 class AuthFacade {
   final AuthService _authService = AuthService.instance;
 
-  /// Login existing user
+  /// LOGIN
   void login({
-  required String role,
-  required String email,
-  required String password,
-}) {
-  final existingUser =
-      UserRepository.instance.getUserByEmail(email);
+    required String role,
+    required String email,
+    required String password,
+  }) {
+    final existingUser =
+        UserRepository.instance.getUserByEmail(email);
 
-  // ❌ NOT REGISTERED
-  if (existingUser == null) {
-    throw Exception("User not registered");
+    // ❌ NOT REGISTERED
+    if (existingUser == null) {
+      throw Exception("User not registered");
+    }
+
+    // ❌ WRONG ROLE
+    if (existingUser.role != role) {
+      throw Exception("Role mismatch");
+    }
+
+    // ✅ LOGIN SUCCESS
+    _authService.login(existingUser);
   }
 
-  // ❌ WRONG ROLE
-  if (existingUser.role != role) {
-    throw Exception("Role mismatch");
-  }
-
- 
-
-  // ✅ LOGIN SUCCESS
-  _authService.login(existingUser);
-}
-
-  /// Register new user
+  /// REGISTER
   void register({
     required String role,
     required String id,
@@ -40,18 +39,21 @@ class AuthFacade {
     required String password,
     required String phone,
   }) {
-    User user = UserFactory.createUser(
-      role: role,
+    // ✅ GET CORRECT FACTORY
+    UserFactory factory =
+        UserFactoryProvider.getFactory(role);
+
+    // ✅ CREATE USER (NO static call)
+    User user = factory.createUser(
       id: id,
-      email: email,
       name: name,
-      password: password,
+      email: email,
       phone: phone,
+      password: password,
     );
 
+    // ✅ REGISTER & SAVE
     _authService.register(user);
-
-    // ✅ SAVE USER
     UserRepository.instance.addUser(user);
   }
 
@@ -61,5 +63,9 @@ class AuthFacade {
     _authService.logout();
   }
 
-  void updateProfile({required String name, required String email, required String phone}) {}
+  void updateProfile({
+    required String name,
+    required String email,
+    required String phone,
+  }) {}
 }

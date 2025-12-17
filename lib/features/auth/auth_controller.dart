@@ -5,6 +5,7 @@ import '../../data/model/user.dart';
 class AuthController {
   final AuthFacade _authFacade = AuthFacade();
   final UserRepository _userRepo = UserRepository.instance;
+  
 
   void login({
     required String role,
