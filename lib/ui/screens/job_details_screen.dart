@@ -39,9 +39,9 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
         SnackBar(content: Text("Selected: ${_selectedFile!.name}")),
       );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error picking file: $e")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error picking file: $e")));
     }
   }
 
@@ -53,34 +53,41 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
       return;
     }
 
-    final resumeIdentifier =
-        kIsWeb ? _selectedFile!.name : _selectedFile!.path!;
+    final resumeIdentifier = kIsWeb
+        ? _selectedFile!.name
+        : _selectedFile!.path!;
 
-    final application = JobApplicationBuilder()
+    final builder = JobApplicationBuilder()
         .setId(DateTime.now().millisecondsSinceEpoch.toString())
         .setApplicant(_authFacade.getCurrentUser()!.id)
         .setJob(widget.job.id)
-        .attachResume(resumeIdentifier)
-        .build();
+        .attachResume(resumeIdentifier);
+
+    // Attach bytes for web platform
+    if (kIsWeb && _resumeBytes != null) {
+      builder.attachResumeBytes(_resumeBytes!);
+    }
+
+    final application = builder.build();
 
     ApplicationRepository.instance.submit(application);
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Applied successfully!")),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text("Applied successfully!")));
   }
 
   void _saveJob() {
     final user = _authFacade.getCurrentUser()!;
     if (!user.savedJobs.contains(widget.job.id)) {
       user.savedJobs.add(widget.job.id);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Job saved")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Job saved")));
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Job already saved")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Job already saved")));
     }
   }
 
@@ -96,10 +103,7 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          "Job Details",
-          style: TextStyle(color: Colors.white),
-        ),
+        title: const Text("Job Details", style: TextStyle(color: Colors.white)),
         centerTitle: true,
       ),
       extendBodyBehindAppBar: true,
@@ -139,28 +143,42 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
                             ),
                           ),
                           const SizedBox(height: 8),
-                          Text("Location: ${job.location}",
-                              style: const TextStyle(fontSize: 16)),
-                          Text("Status: ${job.status}",
-                              style: const TextStyle(fontSize: 16)),
-                          Text("Salary: ${job.salary}",
-                              style: const TextStyle(fontSize: 16)),
+                          Text(
+                            "Location: ${job.location}",
+                            style: const TextStyle(fontSize: 16),
+                          ),
+                          Text(
+                            "Status: ${job.status}",
+                            style: const TextStyle(fontSize: 16),
+                          ),
+                          Text(
+                            "Salary: ${job.salary}",
+                            style: const TextStyle(fontSize: 16),
+                          ),
                           const SizedBox(height: 12),
                           const Text(
                             "Requirements:",
                             style: TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold),
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                          Text(job.requirements,
-                              style: const TextStyle(fontSize: 16)),
+                          Text(
+                            job.requirements,
+                            style: const TextStyle(fontSize: 16),
+                          ),
                           const SizedBox(height: 12),
                           const Text(
                             "Description:",
                             style: TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold),
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                          Text(job.description,
-                              style: const TextStyle(fontSize: 16)),
+                          Text(
+                            job.description,
+                            style: const TextStyle(fontSize: 16),
+                          ),
                         ],
                       ),
                     ),

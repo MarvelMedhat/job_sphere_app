@@ -1,4 +1,7 @@
+import 'dart:typed_data';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'dart:html' as html;
 import '../../data/model/job_application.dart';
 import '../../data/model/user.dart';
 import '../../core/patterns/singleton/application_repository.dart';
@@ -28,8 +31,9 @@ class _ApplicationDetailsScreenState extends State<ApplicationDetailsScreen> {
     super.initState();
     status = widget.application.status;
 
-    applicant =
-        UserRepository.instance.getUserById(widget.application.applicantId);
+    applicant = UserRepository.instance.getUserById(
+      widget.application.applicantId,
+    );
   }
 
   void updateStatus(String newStatus) {
@@ -40,15 +44,50 @@ class _ApplicationDetailsScreenState extends State<ApplicationDetailsScreen> {
     ApplicationRepository.instance.update(widget.application);
   }
 
-  void openResume(String? path) async {
-    if (path == null || path.isEmpty) return;
-    final Uri url = Uri.parse(path);
-    if (await canLaunchUrl(url)) {
-      await launchUrl(url);
+  void openResume(String? fileName, Uint8List? bytes) async {
+    if (fileName == null || fileName.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("No resume uploaded")));
+      return;
+    }
+
+    if (kIsWeb) {
+      // Web platform: Create blob and download
+      if (bytes == null || bytes.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Resume file data not available")),
+        );
+        return;
+      }
+
+      try {
+        // Create a blob from the bytes
+        final blob = html.Blob([bytes], 'application/pdf');
+        final url = html.Url.createObjectUrlFromBlob(blob);
+
+        // Open in new tab
+        html.window.open(url, '_blank');
+
+        // Clean up the URL after a delay
+        Future.delayed(const Duration(seconds: 1), () {
+          html.Url.revokeObjectUrl(url);
+        });
+      } catch (e) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("Error opening resume: $e")));
+      }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Cannot open resume")),
-      );
+      // Mobile platform: Use url_launcher
+      final Uri url = Uri.parse(fileName);
+      if (await canLaunchUrl(url)) {
+        await launchUrl(url);
+      } else {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text("Cannot open resume")));
+      }
     }
   }
 
@@ -130,7 +169,9 @@ class _ApplicationDetailsScreenState extends State<ApplicationDetailsScreen> {
                           Text(
                             "Name: ${applicant?.name ?? 'Unknown'}",
                             style: const TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 18),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
                           ),
                           const SizedBox(height: 6),
                           Text("Email: ${applicant?.email ?? 'Unknown'}"),
@@ -160,10 +201,8 @@ class _ApplicationDetailsScreenState extends State<ApplicationDetailsScreen> {
                         color: Colors.red,
                       ),
                       title: const Text("View Resume"),
-                      subtitle: Text(
-                        app.resumePath ?? "No resume uploaded",
-                      ),
-                      onTap: () => openResume(app.resumePath),
+                      subtitle: Text(app.resumePath ?? "No resume uploaded"),
+                      onTap: () => openResume(app.resumePath, app.resumeBytes),
                     ),
                   ),
 
@@ -184,7 +223,9 @@ class _ApplicationDetailsScreenState extends State<ApplicationDetailsScreen> {
                           const Text(
                             "Application Status",
                             style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 16),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
                           ),
                           const SizedBox(height: 8),
                           DropdownButton<String>(
