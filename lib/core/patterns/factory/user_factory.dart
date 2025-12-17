@@ -19,7 +19,7 @@ class UserFactory {
           email: email,
           phone: phone,
           password: password,
-          savedJobs: [], // optional, can be omitted
+          savedJobs: [], 
         );
       case 'company':
         return Company(

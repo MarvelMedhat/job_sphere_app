@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_application_1/data/model/job.dart';
 import '../../core/patterns/singleton/job_repository.dart';
 
@@ -24,7 +25,6 @@ class _PostJobScreenState extends State<PostJobScreen> {
   void initState() {
     super.initState();
 
-    // Fill fields if editing
     if (widget.job != null) {
       titleController.text = widget.job!.title;
       locationController.text = widget.job!.location;
@@ -38,7 +38,6 @@ class _PostJobScreenState extends State<PostJobScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     if (widget.job == null) {
-      // CREATE JOB
       JobRepository.instance.addJob(
         Job(
           id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -55,7 +54,6 @@ class _PostJobScreenState extends State<PostJobScreen> {
         const SnackBar(content: Text("Job posted successfully!")),
       );
     } else {
-      // UPDATE JOB
       final updatedJob = Job(
         id: widget.job!.id,
         title: titleController.text,
@@ -107,7 +105,6 @@ class _PostJobScreenState extends State<PostJobScreen> {
       extendBodyBehindAppBar: true,
       body: Stack(
         children: [
-          // Gradient background
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -125,18 +122,41 @@ class _PostJobScreenState extends State<PostJobScreen> {
                 child: ListView(
                   children: [
                     const SizedBox(height: 24),
+
+                    // ✅ REQUIRED
                     _buildTextField(titleController, "Job Title"),
                     const SizedBox(height: 12),
-                    _buildTextField(descriptionController, "Description",
-                        maxLines: 3),
+
+                    // ⚪ OPTIONAL
+                    _buildTextField(
+                      descriptionController,
+                      "Description",
+                      maxLines: 3,
+                      isRequired: false,
+                    ),
                     const SizedBox(height: 12),
+
+                    // ✅ REQUIRED
                     _buildTextField(locationController, "Location"),
                     const SizedBox(height: 12),
-                    _buildTextField(salaryController, "Salary"),
+
+                    // ⚪ OPTIONAL (NUMBERS ONLY)
+                    _buildTextField(
+                      salaryController,
+                      "Salary",
+                      isNumeric: true,
+                      isRequired: false,
+                    ),
                     const SizedBox(height: 12),
-                    _buildTextField(requirementsController, "Requirements",
-                        hint: "e.g. Flutter, 2+ years experience",
-                        maxLines: 3),
+
+                    // ✅ REQUIRED
+                    _buildTextField(
+                      requirementsController,
+                      "Requirements",
+                      hint: "e.g. Flutter, 2+ years experience",
+                      maxLines: 3,
+                    ),
+
                     const SizedBox(height: 24),
                     ElevatedButton(
                       onPressed: submitJob,
@@ -144,11 +164,13 @@ class _PostJobScreenState extends State<PostJobScreen> {
                         backgroundColor: Colors.deepPurpleAccent,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                       child: Text(
                         isEdit ? "Update Job" : "Post Job",
-                        style: const TextStyle(fontSize: 18, color: Colors.white),
+                        style: const TextStyle(
+                            fontSize: 18, color: Colors.white),
                       ),
                     ),
                   ],
@@ -161,14 +183,24 @@ class _PostJobScreenState extends State<PostJobScreen> {
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String label,
-      {String? hint, int maxLines = 1}) {
+  Widget _buildTextField(
+    TextEditingController controller,
+    String label, {
+    String? hint,
+    int maxLines = 1,
+    bool isNumeric = false,
+    bool isRequired = true,
+  }) {
     return TextFormField(
       controller: controller,
       maxLines: maxLines,
+      keyboardType:
+          isNumeric ? TextInputType.number : TextInputType.text,
+      inputFormatters:
+          isNumeric ? [FilteringTextInputFormatter.digitsOnly] : null,
       style: const TextStyle(color: Colors.white),
       decoration: InputDecoration(
-        labelText: label,
+        labelText: isRequired ? "$label *" : label,
         hintText: hint,
         labelStyle: const TextStyle(color: Colors.white),
         hintStyle: const TextStyle(color: Colors.white),
@@ -179,7 +211,19 @@ class _PostJobScreenState extends State<PostJobScreen> {
           borderSide: BorderSide.none,
         ),
       ),
-      validator: (v) => v!.isEmpty ? "Enter $label" : null,
+      validator: (value) {
+        if (isRequired && (value == null || value.isEmpty)) {
+          return "Enter $label";
+        }
+
+        if (isNumeric && value != null && value.isNotEmpty) {
+          if (!RegExp(r'^\d+$').hasMatch(value)) {
+            return "$label must be numbers only";
+          }
+        }
+
+        return null;
+      },
     );
   }
 }

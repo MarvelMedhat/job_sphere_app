@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../core/patterns/facade/auth_facade.dart';
 import 'login_screen.dart';
 
@@ -43,7 +44,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // Gradient Background
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -71,17 +71,35 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 24),
+
                     _buildTextField(nameController, "Name"),
                     const SizedBox(height: 12),
-                    _buildTextField(emailController, "Email",
-                        keyboardType: TextInputType.emailAddress),
+
+                    _buildTextField(
+                      emailController,
+                      "Email",
+                      keyboardType: TextInputType.emailAddress,
+                    ),
                     const SizedBox(height: 12),
-                    _buildTextField(passwordController, "Password",
-                        obscureText: true),
+
+                    _buildTextField(
+                      passwordController,
+                      "Password",
+                      obscureText: true,
+                    ),
                     const SizedBox(height: 12),
-                    _buildTextField(phoneController, "Phone",
-                        keyboardType: TextInputType.phone),
+
+                    // ✅ PHONE (NUMBERS ONLY)
+                    _buildTextField(
+                      phoneController,
+                      "Phone",
+                      keyboardType: TextInputType.phone,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                      ],
+                    ),
                     const SizedBox(height: 12),
+
                     DropdownButtonFormField<String>(
                       value: role,
                       items: const [
@@ -92,7 +110,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ],
                       onChanged: (value) => setState(() => role = value!),
                       decoration: InputDecoration(
-                        labelStyle: const TextStyle(color: Colors.white),
+                        labelStyle: const TextStyle(color: Colors.white ),
                         filled: true,
                         fillColor: Colors.white12,
                         border: OutlineInputBorder(
@@ -101,11 +119,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                       ),
                     ),
+
                     const SizedBox(height: 24),
                     ElevatedButton(
                       onPressed: register,
                       style: ElevatedButton.styleFrom(
-                        textStyle: const TextStyle(color: Colors.white),
                         backgroundColor: Colors.deepPurpleAccent,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
@@ -113,9 +131,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       child: const Text(
                         "Register",
-                        style: TextStyle(fontSize: 18),
+                        style: TextStyle(fontSize: 18, color: Colors.white),
                       ),
                     ),
+
                     TextButton(
                       onPressed: () => Navigator.pop(context),
                       child: const Text(
@@ -133,13 +152,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String label,
-      {bool obscureText = false, TextInputType keyboardType = TextInputType.text}) {
+  Widget _buildTextField(
+    TextEditingController controller,
+    String label, {
+    bool obscureText = false,
+    TextInputType keyboardType = TextInputType.text,
+    List<TextInputFormatter>? inputFormatters,
+  }) {
     return TextFormField(
       controller: controller,
       obscureText: obscureText,
-      style: const TextStyle(color: Colors.white),
       keyboardType: keyboardType,
+      inputFormatters: inputFormatters,
+      style: const TextStyle(color: Colors.white),
       decoration: InputDecoration(
         labelText: label,
         labelStyle: const TextStyle(color: Colors.white),
@@ -150,7 +175,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
           borderSide: BorderSide.none,
         ),
       ),
-      validator: (v) => v!.isEmpty ? "Enter $label" : null,
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return "Enter $label";
+        }
+
+        if (label == "Phone") {
+          if (!RegExp(r'^\d+$').hasMatch(value)) {
+            return "Phone must contain only numbers";
+          }
+          if (value.length != 11) {
+            return "Phone must be 11 digits";
+          }
+        }
+
+        return null;
+      },
     );
   }
 }

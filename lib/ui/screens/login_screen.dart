@@ -3,7 +3,6 @@ import '/features/auth/auth_controller.dart';
 import 'applicant_home.dart';
 import 'company_home.dart';
 import 'register_screen.dart';
-import '../../core/patterns/singleton/UserRepository.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
