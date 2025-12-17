@@ -1,18 +1,22 @@
 import '../../core/patterns/facade/job_search_facade.dart';
+import '../../core/patterns/facade/job_management_facade.dart';
+import '../../core/patterns/facade/application_management_facade.dart';
 import '../../core/patterns/strategy/job_search_strategy.dart';
 import '../../core/patterns/strategy/job_search_context.dart';
 import '../../core/patterns/builder/job_application_builder.dart';
-import '../../core/patterns/singleton/application_repository.dart';
-import '../../core/patterns/singleton/job_repository.dart';
 import '../../data/model/job.dart';
 
 class ApplicantController {
+  final JobManagementFacade _jobFacade = JobManagementFacade();
+  final ApplicationManagementFacade _applicationFacade =
+      ApplicationManagementFacade();
+
   /// 🔍 Search jobs using Strategy
   List<Job> searchJobs({
     required JobSearchStrategy strategy,
     required String keyword,
   }) {
-    final jobs = JobRepository.instance.jobs;
+    final jobs = _jobFacade.getJobs();
     final context = JobSearchContext(strategy);
     final searchFacade = JobSearchFacade(context);
     return searchFacade.search(jobs, keyword);
@@ -30,6 +34,6 @@ class ApplicantController {
         .attachResume(resumePath)
         .build();
 
-    ApplicationRepository.instance.submit(application);
+    _applicationFacade.submitApplication(application);
   }
 }

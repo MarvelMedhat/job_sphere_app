@@ -4,7 +4,12 @@ import '../../patterns/factory/user_factory_provider.dart';
 import '../../patterns/singleton/auth_service.dart';
 import '../../../data/model/user.dart';
 
+/// Facade for Authentication
+/// Simplifies authentication and user management operations
+/// Following the Facade pattern: aggregates multiple subsystems
+/// (AuthService, UserRepository, UserFactoryProvider)
 class AuthFacade {
+  // Subsystem: Auth Service
   final AuthService _authService = AuthService.instance;
 
   /// LOGIN
@@ -13,8 +18,7 @@ class AuthFacade {
     required String email,
     required String password,
   }) {
-    final existingUser =
-        UserRepository.instance.getUserByEmail(email);
+    final existingUser = UserRepository.instance.getUserByEmail(email);
 
     // ❌ NOT REGISTERED
     if (existingUser == null) {
@@ -40,8 +44,7 @@ class AuthFacade {
     required String phone,
   }) {
     // ✅ GET CORRECT FACTORY
-    UserFactory factory =
-        UserFactoryProvider.getFactory(role);
+    UserFactory factory = UserFactoryProvider.getFactory(role);
 
     // ✅ CREATE USER (NO static call)
     User user = factory.createUser(

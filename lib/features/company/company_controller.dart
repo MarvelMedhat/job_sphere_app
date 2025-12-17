@@ -2,7 +2,6 @@ import '../../core/patterns/builder/job_builder.dart';
 import '../../core/patterns/facade/job_management_facade.dart';
 import '../../core/patterns/facade/application_management_facade.dart';
 import '../../core/patterns/strategy/application_status_strategy.dart';
-import '../../core/patterns/singleton/application_repository.dart';
 import '../../data/model/job.dart';
 import '../../data/model/job_application.dart';
 
@@ -27,9 +26,9 @@ class CompanyController {
     _jobFacade.postJob(job);
   }
 
-  /// 📋 View all applications
+  /// 📋 View all applications (using Facade)
   List<JobApplication> get applications =>
-      ApplicationRepository.instance.applications;
+      _applicationFacade.getAllApplications();
 
   /// 🔄 Update application status using Strategy
   void updateApplicationStatus(

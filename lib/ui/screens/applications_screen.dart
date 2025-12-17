@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/data/model/job.dart';
 import 'package:flutter_application_1/ui/screens/application_details.dart';
-import '../../core/patterns/singleton/application_repository.dart';
-import '../../core/patterns/singleton/job_repository.dart';
+import '../../core/patterns/facade/application_management_facade.dart';
+import '../../core/patterns/facade/job_management_facade.dart';
 import '../../core/patterns/singleton/UserRepository.dart';
-//import '../../data/model/user.dart';
 
 class ApplicationsScreen extends StatefulWidget {
   const ApplicationsScreen({super.key});
@@ -18,17 +16,18 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
 
   final Color cardColor = Colors.white.withOpacity(0.95);
 
+  // Use Facades instead of direct repository access
+  final ApplicationManagementFacade _applicationFacade =
+      ApplicationManagementFacade();
+  final JobManagementFacade _jobFacade = JobManagementFacade();
+
   @override
   Widget build(BuildContext context) {
-    final applications = ApplicationRepository.instance.applications;
-    final jobs = JobRepository.instance.jobs;
+    final applications = _applicationFacade.getAllApplications();
 
-    // 🔹 Get job title by jobId
+    // 🔹 Get job title by jobId (now using facade)
     String jobTitle(String? jobId) {
-      final job = jobs.cast<Job?>().firstWhere(
-        (j) => j!.id == jobId,
-        orElse: () => null,
-      );
+      final job = _jobFacade.getJobById(jobId ?? '');
       return job?.title ?? "Unknown Job";
     }
 

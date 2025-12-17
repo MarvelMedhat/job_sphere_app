@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../core/patterns/singleton/job_repository.dart';
+import '../../core/patterns/facade/job_management_facade.dart';
 import '../../core/patterns/strategy/job_search_context.dart';
 import '../../core/patterns/strategy/search_by_location.dart';
 import '../../core/patterns/strategy/search_by_title.dart';
@@ -14,7 +14,8 @@ class JobListScreen extends StatefulWidget {
 }
 
 class _JobListScreenState extends State<JobListScreen> {
-  final jobs = JobRepository.instance.jobs;
+  // Use Facade instead of direct repository access
+  final JobManagementFacade _jobFacade = JobManagementFacade();
 
   late JobSearchContext searchContext;
 
@@ -31,7 +32,11 @@ class _JobListScreenState extends State<JobListScreen> {
 
   // Get unique locations for filter dropdown
   List<String> get locations {
-    final allLocations = jobs.map((job) => job.location).toSet().toList();
+    final allLocations = _jobFacade
+        .getJobs()
+        .map((job) => job.location)
+        .toSet()
+        .toList();
     allLocations.sort();
     return allLocations;
   }
@@ -39,7 +44,10 @@ class _JobListScreenState extends State<JobListScreen> {
   // Filter jobs using Strategy Pattern + other filters
   List<Job> get filteredJobs {
     // Step 1: Search using Strategy
-    List<Job> results = searchContext.performSearch(jobs, searchQuery);
+    List<Job> results = searchContext.performSearch(
+      _jobFacade.getJobs(),
+      searchQuery,
+    );
 
     // Step 2: Filter by location
     if (selectedLocation != null) {
