@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../core/patterns/singleton/job_repository.dart';
+import '../../core/patterns/strategy/job_search_context.dart';
+import '../../core/patterns/strategy/search_by_location.dart';
+import '../../core/patterns/strategy/search_by_title.dart';
+import '../../data/model/job.dart';
 import 'job_details_screen.dart';
 
 class JobListScreen extends StatefulWidget {
@@ -12,34 +16,54 @@ class JobListScreen extends StatefulWidget {
 class _JobListScreenState extends State<JobListScreen> {
   final jobs = JobRepository.instance.jobs;
 
+  late JobSearchContext searchContext;
+
   String searchQuery = '';
   String? selectedLocation;
   int? minSalary;
 
+  @override
+  void initState() {
+    super.initState();
+    // Default search strategy: by title
+    searchContext = JobSearchContext(SearchByTitle());
+  }
+
+  // Get unique locations for filter dropdown
   List<String> get locations {
     final allLocations = jobs.map((job) => job.location).toSet().toList();
     allLocations.sort();
     return allLocations;
   }
 
-  List filteredJobs() {
-    return jobs.where((job) {
-      if (job.status != "open") return false;
+  // Filter jobs using Strategy Pattern + other filters
+  List<Job> get filteredJobs {
+    // Step 1: Search using Strategy
+    List<Job> results = searchContext.performSearch(jobs, searchQuery);
 
-      final matchesTitle =
-          job.title.toLowerCase().contains(searchQuery.toLowerCase());
-      final matchesLocation =
-          selectedLocation == null || job.location == selectedLocation;
-      final jobSalary = int.tryParse(job.salary) ?? 0;
-      final matchesSalary = minSalary == null || jobSalary >= minSalary!;
+    // Step 2: Filter by location
+    if (selectedLocation != null) {
+      results = results
+          .where((job) => job.location == selectedLocation)
+          .toList();
+    }
 
-      return matchesTitle && matchesLocation && matchesSalary;
-    }).toList();
+    // Step 3: Filter by minimum salary
+    if (minSalary != null) {
+      results = results
+          .where((job) => (int.tryParse(job.salary) ?? 0) >= minSalary!)
+          .toList();
+    }
+
+    // Step 4: Only open jobs
+    results = results.where((job) => job.status == "open").toList();
+
+    return results;
   }
 
   @override
   Widget build(BuildContext context) {
-    final filtered = filteredJobs();
+    final filtered = filteredJobs;
 
     return Scaffold(
       appBar: AppBar(
@@ -49,10 +73,7 @@ class _JobListScreenState extends State<JobListScreen> {
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          "Job List",
-          style: TextStyle(color: Colors.white),
-        ),
+        title: const Text("Job List", style: TextStyle(color: Colors.white)),
         centerTitle: true,
       ),
       extendBodyBehindAppBar: true,
@@ -68,15 +89,13 @@ class _JobListScreenState extends State<JobListScreen> {
               ),
             ),
           ),
-
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(12),
               child: Column(
                 children: [
                   const SizedBox(height: 8),
-
-                  // Filters: Search + Location + Salary
+                  // Search + Filters
                   Card(
                     elevation: 5,
                     shape: RoundedRectangleBorder(
@@ -86,19 +105,24 @@ class _JobListScreenState extends State<JobListScreen> {
                       padding: const EdgeInsets.all(12),
                       child: Column(
                         children: [
+                          // Search by title (Strategy)
                           TextField(
                             decoration: const InputDecoration(
                               labelText: "Search by job title",
                               prefixIcon: Icon(Icons.search),
                               border: OutlineInputBorder(),
                             ),
-                            onChanged: (value) => setState(() {
-                              searchQuery = value;
-                            }),
+                            onChanged: (value) {
+                              setState(() {
+                                searchQuery = value;
+                                searchContext.setStrategy(SearchByTitle());
+                              });
+                            },
                           ),
                           const SizedBox(height: 12),
                           Row(
                             children: [
+                              // Location filter
                               Expanded(
                                 child: DropdownButtonFormField<String>(
                                   value: selectedLocation,
@@ -109,12 +133,25 @@ class _JobListScreenState extends State<JobListScreen> {
                                       child: Text(loc ?? "Location"),
                                     );
                                   }).toList(),
-                                  onChanged: (value) => setState(() {
-                                    selectedLocation = value;
-                                  }),
+                                  onChanged: (value) {
+                                    setState(() {
+                                      selectedLocation = value;
+                                      if (value != null) {
+                                        // Change Strategy dynamically if needed
+                                        searchContext.setStrategy(
+                                          SearchByLocation(),
+                                        );
+                                      } else {
+                                        searchContext.setStrategy(
+                                          SearchByTitle(),
+                                        );
+                                      }
+                                    });
+                                  },
                                 ),
                               ),
                               const SizedBox(width: 12),
+                              // Salary filter
                               Expanded(
                                 child: DropdownButtonFormField<int>(
                                   value: minSalary,
@@ -137,9 +174,11 @@ class _JobListScreenState extends State<JobListScreen> {
                                       child: Text("20000+"),
                                     ),
                                   ],
-                                  onChanged: (value) => setState(() {
-                                    minSalary = value;
-                                  }),
+                                  onChanged: (value) {
+                                    setState(() {
+                                      minSalary = value;
+                                    });
+                                  },
                                 ),
                               ),
                             ],
@@ -148,9 +187,7 @@ class _JobListScreenState extends State<JobListScreen> {
                       ),
                     ),
                   ),
-
                   const SizedBox(height: 12),
-
                   // Job List
                   Expanded(
                     child: filtered.isEmpty
@@ -168,8 +205,7 @@ class _JobListScreenState extends State<JobListScreen> {
                             itemBuilder: (_, index) {
                               final job = filtered[index];
                               return Card(
-                                margin:
-                                    const EdgeInsets.symmetric(vertical: 6),
+                                margin: const EdgeInsets.symmetric(vertical: 6),
                                 elevation: 4,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
@@ -178,10 +214,12 @@ class _JobListScreenState extends State<JobListScreen> {
                                   title: Text(
                                     job.title,
                                     style: const TextStyle(
-                                        fontWeight: FontWeight.bold),
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                   subtitle: Text(
-                                      "${job.location} • ${job.salary}"),
+                                    "${job.location} • ${job.salary}",
+                                  ),
                                   trailing: const Icon(
                                     Icons.arrow_forward_ios,
                                     size: 18,

@@ -1,5 +1,6 @@
 import '../../core/patterns/facade/job_search_facade.dart';
 import '../../core/patterns/strategy/job_search_strategy.dart';
+import '../../core/patterns/strategy/job_search_context.dart';
 import '../../core/patterns/builder/job_application_builder.dart';
 import '../../core/patterns/singleton/application_repository.dart';
 import '../../core/patterns/singleton/job_repository.dart';
@@ -12,7 +13,8 @@ class ApplicantController {
     required String keyword,
   }) {
     final jobs = JobRepository.instance.jobs;
-    final searchFacade = JobSearchFacade(strategy);
+    final context = JobSearchContext(strategy);
+    final searchFacade = JobSearchFacade(context);
     return searchFacade.search(jobs, keyword);
   }
 

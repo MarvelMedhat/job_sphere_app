@@ -1,11 +1,13 @@
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/core/patterns/strategy/application_status_context.dart';
 import 'dart:html' as html;
 import '../../data/model/job_application.dart';
 import '../../data/model/user.dart';
 import '../../core/patterns/singleton/application_repository.dart';
 import '../../core/patterns/singleton/UserRepository.dart';
+import '../../core/patterns/strategy/application_status_strategy.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ApplicationDetailsScreen extends StatefulWidget {
@@ -19,29 +21,28 @@ class ApplicationDetailsScreen extends StatefulWidget {
 }
 
 class _ApplicationDetailsScreenState extends State<ApplicationDetailsScreen> {
-  late String status;
+  late ApplicationStatusContext statusContext;
   User? applicant;
 
-  final Color primaryColor = Colors.deepPurple;
-  final Color accentColor = Colors.purpleAccent;
   final Color cardColor = Colors.white.withOpacity(0.95);
 
   @override
   void initState() {
     super.initState();
-    status = widget.application.status;
 
+    // Initialize applicant
     applicant = UserRepository.instance.getUserById(
       widget.application.applicantId,
     );
-  }
 
-  void updateStatus(String newStatus) {
-    setState(() {
-      status = newStatus;
-      widget.application.status = newStatus;
-    });
-    ApplicationRepository.instance.update(widget.application);
+    // Initialize status context based on current application status
+    statusContext = ApplicationStatusContext(
+      widget.application.status == "Accepted"
+          ? AcceptedStatus()
+          : widget.application.status == "Rejected"
+          ? RejectedStatus()
+          : PendingStatus(),
+    );
   }
 
   void openResume(String? fileName, Uint8List? bytes) async {
@@ -53,7 +54,6 @@ class _ApplicationDetailsScreenState extends State<ApplicationDetailsScreen> {
     }
 
     if (kIsWeb) {
-      // Web platform: Create blob and download
       if (bytes == null || bytes.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Resume file data not available")),
@@ -62,14 +62,9 @@ class _ApplicationDetailsScreenState extends State<ApplicationDetailsScreen> {
       }
 
       try {
-        // Create a blob from the bytes
         final blob = html.Blob([bytes], 'application/pdf');
         final url = html.Url.createObjectUrlFromBlob(blob);
-
-        // Open in new tab
         html.window.open(url, '_blank');
-
-        // Clean up the URL after a delay
         Future.delayed(const Duration(seconds: 1), () {
           html.Url.revokeObjectUrl(url);
         });
@@ -79,7 +74,6 @@ class _ApplicationDetailsScreenState extends State<ApplicationDetailsScreen> {
         ).showSnackBar(SnackBar(content: Text("Error opening resume: $e")));
       }
     } else {
-      // Mobile platform: Use url_launcher
       final Uri url = Uri.parse(fileName);
       if (await canLaunchUrl(url)) {
         await launchUrl(url);
@@ -112,7 +106,6 @@ class _ApplicationDetailsScreenState extends State<ApplicationDetailsScreen> {
       extendBodyBehindAppBar: true,
       body: Stack(
         children: [
-          // Gradient background
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -122,8 +115,6 @@ class _ApplicationDetailsScreenState extends State<ApplicationDetailsScreen> {
               ),
             ),
           ),
-
-          // Decorative circles
           Positioned(
             top: -50,
             left: -50,
@@ -148,7 +139,6 @@ class _ApplicationDetailsScreenState extends State<ApplicationDetailsScreen> {
               ),
             ),
           ),
-
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -185,9 +175,7 @@ class _ApplicationDetailsScreenState extends State<ApplicationDetailsScreen> {
                       ),
                     ),
                   ),
-
                   const SizedBox(height: 24),
-
                   // Resume Card
                   Card(
                     color: cardColor,
@@ -205,10 +193,8 @@ class _ApplicationDetailsScreenState extends State<ApplicationDetailsScreen> {
                       onTap: () => openResume(app.resumePath, app.resumeBytes),
                     ),
                   ),
-
                   const SizedBox(height: 24),
-
-                  // Status Dropdown
+                  // Status Dropdown using Strategy
                   Card(
                     color: cardColor,
                     elevation: 6,
@@ -230,15 +216,15 @@ class _ApplicationDetailsScreenState extends State<ApplicationDetailsScreen> {
                           const SizedBox(height: 8),
                           DropdownButton<String>(
                             isExpanded: true,
-                            value: status,
+                            value: statusContext.getStatus(),
                             items: const [
                               DropdownMenuItem(
                                 value: "Pending",
                                 child: Text("Pending"),
                               ),
                               DropdownMenuItem(
-                                value: "Interview",
-                                child: Text("Interview"),
+                                value: "Accepted",
+                                child: Text("Accepted"),
                               ),
                               DropdownMenuItem(
                                 value: "Rejected",
@@ -246,7 +232,25 @@ class _ApplicationDetailsScreenState extends State<ApplicationDetailsScreen> {
                               ),
                             ],
                             onChanged: (value) {
-                              if (value != null) updateStatus(value);
+                              if (value != null) {
+                                setState(() {
+                                  // Set strategy based on selection
+                                  if (value == "Pending") {
+                                    statusContext.setStrategy(PendingStatus());
+                                  } else if (value == "Accepted") {
+                                    statusContext.setStrategy(AcceptedStatus());
+                                  } else if (value == "Rejected") {
+                                    statusContext.setStrategy(RejectedStatus());
+                                  }
+
+                                  // Save to application model & repository
+                                  widget.application.status = statusContext
+                                      .getStatus();
+                                  ApplicationRepository.instance.update(
+                                    widget.application,
+                                  );
+                                });
+                              }
                             },
                           ),
                         ],

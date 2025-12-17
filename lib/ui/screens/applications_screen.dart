@@ -4,7 +4,7 @@ import 'package:flutter_application_1/ui/screens/application_details.dart';
 import '../../core/patterns/singleton/application_repository.dart';
 import '../../core/patterns/singleton/job_repository.dart';
 import '../../core/patterns/singleton/UserRepository.dart';
-import '../../data/model/user.dart';
+//import '../../data/model/user.dart';
 
 class ApplicationsScreen extends StatefulWidget {
   const ApplicationsScreen({super.key});
@@ -39,9 +39,9 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
     }
 
     final filtered = applications.where((app) {
-      return jobTitle(app.jobId)
-          .toLowerCase()
-          .contains(searchQuery.toLowerCase());
+      return jobTitle(
+        app.jobId,
+      ).toLowerCase().contains(searchQuery.toLowerCase());
     }).toList();
 
     return Scaffold(
@@ -77,8 +77,10 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
 
                 // 🔍 Search bar
                 Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   child: TextField(
                     decoration: InputDecoration(
                       labelText: "Search by job title",
@@ -115,7 +117,9 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
                                 borderRadius: BorderRadius.circular(16),
                               ),
                               margin: const EdgeInsets.symmetric(
-                                  horizontal: 16, vertical: 8),
+                                horizontal: 16,
+                                vertical: 8,
+                              ),
                               child: ListTile(
                                 title: Text(jobTitle(app.jobId)),
                                 subtitle: Column(
@@ -127,14 +131,12 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
                                     Text("Status: ${app.status}"),
                                   ],
                                 ),
-                                trailing:
-                                    const Icon(Icons.arrow_forward_ios),
+                                trailing: const Icon(Icons.arrow_forward_ios),
                                 onTap: () {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (_) =>
-                                          ApplicationDetailsScreen(
+                                      builder: (_) => ApplicationDetailsScreen(
                                         application: app,
                                       ),
                                     ),
