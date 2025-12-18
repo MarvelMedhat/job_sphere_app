@@ -38,9 +38,12 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
     }
 
     final filtered = applications.where((app) {
-      return jobTitle(
-        app.jobId,
-      ).toLowerCase().contains(searchQuery.toLowerCase());
+      final job = jobTitle(app.jobId).toLowerCase();
+      final applicant = applicantName(app.applicantId).toLowerCase();
+      final query = searchQuery.toLowerCase();
+
+      // Search by both job title and applicant name
+      return job.contains(query) || applicant.contains(query);
     }).toList();
 
     return Scaffold(
@@ -82,7 +85,7 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
                   ),
                   child: TextField(
                     decoration: InputDecoration(
-                      labelText: "Search by job title",
+                      labelText: "Search by job title or applicant name",
                       prefixIcon: const Icon(Icons.search),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
