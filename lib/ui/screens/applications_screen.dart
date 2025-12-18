@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/ui/screens/application_details.dart';
+import '/ui/screens/application_details.dart';
 import '../../core/patterns/facade/application_management_facade.dart';
 import '../../core/patterns/facade/job_management_facade.dart';
 import '../../core/patterns/singleton/UserRepository.dart';
@@ -16,7 +16,6 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
 
   final Color cardColor = Colors.white.withOpacity(0.95);
 
-  // Use Facades instead of direct repository access
   final ApplicationManagementFacade _applicationFacade =
       ApplicationManagementFacade();
   final JobManagementFacade _jobFacade = JobManagementFacade();
@@ -25,13 +24,13 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
   Widget build(BuildContext context) {
     final applications = _applicationFacade.getAllApplications();
 
-    // 🔹 Get job title by jobId (now using facade)
+    
     String jobTitle(String? jobId) {
       final job = _jobFacade.getJobById(jobId ?? '');
       return job?.title ?? "Unknown Job";
     }
 
-    // 🔹 Get applicant name by applicantId
+  
     String applicantName(String? applicantId) {
       final user = UserRepository.instance.getUserById(applicantId);
       return user?.name ?? "Unknown Applicant";
@@ -42,7 +41,6 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
       final applicant = applicantName(app.applicantId).toLowerCase();
       final query = searchQuery.toLowerCase();
 
-      // Search by both job title and applicant name
       return job.contains(query) || applicant.contains(query);
     }).toList();
 
@@ -77,7 +75,6 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
               children: [
                 const SizedBox(height: 8),
 
-                // 🔍 Search bar
                 Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16,
@@ -99,7 +96,6 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
                   ),
                 ),
 
-                // 📄 Applications list
                 Expanded(
                   child: filtered.isEmpty
                       ? const Center(

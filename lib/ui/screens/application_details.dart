@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/core/patterns/strategy/application_status_context.dart';
+import '/core/patterns/strategy/application_status_context.dart';
 import 'dart:html' as html;
 import '../../data/model/job_application.dart';
 import '../../data/model/user.dart';
@@ -30,12 +30,11 @@ class _ApplicationDetailsScreenState extends State<ApplicationDetailsScreen> {
   void initState() {
     super.initState();
 
-    // Initialize applicant
     applicant = UserRepository.instance.getUserById(
       widget.application.applicantId,
     );
 
-    // Initialize status context based on current application status
+    //check status and set strategy
     statusContext = ApplicationStatusContext(
       widget.application.status == "Accepted"
           ? AcceptedStatus()
@@ -52,7 +51,8 @@ class _ApplicationDetailsScreenState extends State<ApplicationDetailsScreen> {
       ).showSnackBar(const SnackBar(content: Text("No resume uploaded")));
       return;
     }
-
+    
+    // Web
     if (kIsWeb) {
       if (bytes == null || bytes.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -73,6 +73,7 @@ class _ApplicationDetailsScreenState extends State<ApplicationDetailsScreen> {
           context,
         ).showSnackBar(SnackBar(content: Text("Error opening resume: $e")));
       }
+      // Mobile/Desktop
     } else {
       final Uri url = Uri.parse(fileName);
       if (await canLaunchUrl(url)) {
@@ -176,7 +177,7 @@ class _ApplicationDetailsScreenState extends State<ApplicationDetailsScreen> {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  // Resume Card
+                  
                   Card(
                     color: cardColor,
                     elevation: 6,
@@ -194,7 +195,7 @@ class _ApplicationDetailsScreenState extends State<ApplicationDetailsScreen> {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  // Status Dropdown using Strategy
+            
                   Card(
                     color: cardColor,
                     elevation: 6,
@@ -234,7 +235,7 @@ class _ApplicationDetailsScreenState extends State<ApplicationDetailsScreen> {
                             onChanged: (value) {
                               if (value != null) {
                                 setState(() {
-                                  // Set strategy based on selection
+                                  // Set strategy 
                                   if (value == "Pending") {
                                     statusContext.setStrategy(PendingStatus());
                                   } else if (value == "Accepted") {
@@ -243,7 +244,7 @@ class _ApplicationDetailsScreenState extends State<ApplicationDetailsScreen> {
                                     statusContext.setStrategy(RejectedStatus());
                                   }
 
-                                  // Save to application model & repository
+                                  // Save to application model and repository
                                   widget.application.status = statusContext
                                       .getStatus();
                                   ApplicationRepository.instance.update(

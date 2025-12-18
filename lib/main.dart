@@ -12,8 +12,6 @@ class JobSphereApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'JobSphere',
-      debugShowCheckedModeBanner: false,
-
       theme: ThemeData(
         primarySwatch: Colors.indigo,
         useMaterial3: true,

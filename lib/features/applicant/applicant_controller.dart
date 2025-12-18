@@ -11,7 +11,6 @@ class ApplicantController {
   final ApplicationManagementFacade _applicationFacade =
       ApplicationManagementFacade();
 
-  /// 🔍 Search jobs using Strategy
   List<Job> searchJobs({
     required JobSearchStrategy strategy,
     required String keyword,
@@ -22,7 +21,6 @@ class ApplicantController {
     return searchFacade.search(jobs, keyword);
   }
 
-  /// 📄 Apply for a job using Builder
   void applyForJob({
     required String applicantId,
     required String jobId,

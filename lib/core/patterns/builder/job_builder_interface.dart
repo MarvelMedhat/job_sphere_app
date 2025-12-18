@@ -1,7 +1,6 @@
 import '../../../data/model/job.dart';
 
-/// Abstract Builder interface for Job construction
-/// Defines all the building steps required to construct a Job object
+
 abstract class JobBuilderInterface {
   void buildId(String id);
   
@@ -17,6 +16,5 @@ abstract class JobBuilderInterface {
   
   void buildStatus(String status);
   
-  /// Returns the constructed Job object
   Job getResult();
 }

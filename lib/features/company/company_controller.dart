@@ -10,7 +10,6 @@ class CompanyController {
   final ApplicationManagementFacade _applicationFacade =
       ApplicationManagementFacade();
 
-  /// 📝 Post new job using Builder
   void postJob({
     required String title,
     required String description,
@@ -26,11 +25,10 @@ class CompanyController {
     _jobFacade.postJob(job);
   }
 
-  /// 📋 View all applications (using Facade)
   List<JobApplication> get applications =>
       _applicationFacade.getAllApplications();
 
-  /// 🔄 Update application status using Strategy
+  
   void updateApplicationStatus(
     JobApplication application,
     ApplicationStatusStrategy strategy,
@@ -38,6 +36,5 @@ class CompanyController {
     _applicationFacade.updateStatus(application, strategy);
   }
 
-  /// 📢 View posted jobs
   List<Job> get jobs => _jobFacade.getJobs();
 }

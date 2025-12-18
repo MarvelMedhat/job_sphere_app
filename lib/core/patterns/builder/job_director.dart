@@ -1,15 +1,11 @@
 import 'job_builder_interface.dart';
 import '../../../data/model/job.dart';
 
-/// Director class for Job construction
-/// Orchestrates the construction process using a JobBuilderInterface
-/// Provides different standardized construction workflows
 class JobDirector {
   final JobBuilderInterface _builder;
 
   JobDirector(this._builder);
 
-  /// Constructs a basic job with minimal required fields
   Job constructBasicJob({
     required String id,
     required String title,
@@ -28,7 +24,6 @@ class JobDirector {
     return _builder.getResult();
   }
 
-  /// Constructs a complete job with all fields
   Job constructFullJob({
     required String id,
     required String title,
@@ -49,7 +44,6 @@ class JobDirector {
     return _builder.getResult();
   }
 
-  /// Constructs a job with salary information
   Job constructJobWithSalary({
     required String id,
     required String title,
@@ -69,7 +63,6 @@ class JobDirector {
     return _builder.getResult();
   }
 
-  /// Constructs a job with requirements information
   Job constructJobWithRequirements({
     required String id,
     required String title,

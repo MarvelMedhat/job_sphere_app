@@ -1,13 +1,10 @@
 import '../../../data/model/job_application.dart';
 
 class ApplicationRepository {
-  // Lazy initialization - instance is null until first access
   static ApplicationRepository? _instance;
 
-  // Private constructor
   ApplicationRepository._internal();
   
-  // Lazy initialization getter - creates instance only when first called
   static ApplicationRepository get instance {
     if (_instance == null) {
       _instance = ApplicationRepository._internal();
@@ -26,6 +23,10 @@ class ApplicationRepository {
     if (index != -1) {
       applications[index] = app;
     }
+  }
+
+  void removeApplicationsByJobId(String jobId) {
+    applications.removeWhere((app) => app.jobId == jobId);
   }
 
   List<JobApplication> byJob(String jobId) {

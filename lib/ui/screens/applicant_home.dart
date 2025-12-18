@@ -18,7 +18,6 @@ class ApplicantHomeScreen extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          // Gradient background
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -29,7 +28,6 @@ class ApplicantHomeScreen extends StatelessWidget {
             ),
           ),
 
-          // Decorative circles
           Positioned(
             top: -50,
             left: -50,
@@ -55,13 +53,11 @@ class ApplicantHomeScreen extends StatelessWidget {
             ),
           ),
 
-          // Main content
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  // AppBar replacement with title and logout
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -89,7 +85,6 @@ class ApplicantHomeScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 40),
 
-                  // Browse Jobs Card
                   InkWell(
                     onTap: () {
                       Navigator.push(
@@ -123,7 +118,6 @@ class ApplicantHomeScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 24),
 
-                  // Profile Card
                   InkWell(
                     onTap: () {
                       Navigator.push(

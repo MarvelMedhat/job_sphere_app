@@ -14,7 +14,7 @@ class JobListScreen extends StatefulWidget {
 }
 
 class _JobListScreenState extends State<JobListScreen> {
-  // Use Facade instead of direct repository access
+
   final JobManagementFacade _jobFacade = JobManagementFacade();
 
   late JobSearchContext searchContext;
@@ -26,11 +26,9 @@ class _JobListScreenState extends State<JobListScreen> {
   @override
   void initState() {
     super.initState();
-    // Default search strategy: by title
     searchContext = JobSearchContext(SearchByTitle());
   }
 
-  // Get unique locations for filter dropdown
   List<String> get locations {
     final allLocations = _jobFacade
         .getJobs()
@@ -41,29 +39,26 @@ class _JobListScreenState extends State<JobListScreen> {
     return allLocations;
   }
 
-  // Filter jobs using Strategy Pattern + other filters
   List<Job> get filteredJobs {
-    // Step 1: Search using Strategy
     List<Job> results = searchContext.performSearch(
       _jobFacade.getJobs(),
       searchQuery,
     );
 
-    // Step 2: Filter by location
+    // Filter by location
     if (selectedLocation != null) {
       results = results
           .where((job) => job.location == selectedLocation)
           .toList();
     }
 
-    // Step 3: Filter by minimum salary
+    // Filter by salary
     if (minSalary != null) {
       results = results
           .where((job) => (int.tryParse(job.salary) ?? 0) >= minSalary!)
           .toList();
     }
 
-    // Step 4: Only open jobs
     results = results.where((job) => job.status == "open").toList();
 
     return results;
@@ -87,7 +82,6 @@ class _JobListScreenState extends State<JobListScreen> {
       extendBodyBehindAppBar: true,
       body: Stack(
         children: [
-          // Gradient background
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -103,7 +97,6 @@ class _JobListScreenState extends State<JobListScreen> {
               child: Column(
                 children: [
                   const SizedBox(height: 8),
-                  // Search + Filters
                   Card(
                     elevation: 5,
                     shape: RoundedRectangleBorder(
@@ -113,7 +106,6 @@ class _JobListScreenState extends State<JobListScreen> {
                       padding: const EdgeInsets.all(12),
                       child: Column(
                         children: [
-                          // Search by title (Strategy)
                           TextField(
                             decoration: const InputDecoration(
                               labelText: "Search by job title",
@@ -130,7 +122,6 @@ class _JobListScreenState extends State<JobListScreen> {
                           const SizedBox(height: 12),
                           Row(
                             children: [
-                              // Location filter
                               Expanded(
                                 child: DropdownButtonFormField<String>(
                                   value: selectedLocation,
@@ -145,7 +136,6 @@ class _JobListScreenState extends State<JobListScreen> {
                                     setState(() {
                                       selectedLocation = value;
                                       if (value != null) {
-                                        // Change Strategy dynamically if needed
                                         searchContext.setStrategy(
                                           SearchByLocation(),
                                         );
@@ -196,7 +186,6 @@ class _JobListScreenState extends State<JobListScreen> {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  // Job List
                   Expanded(
                     child: filtered.isEmpty
                         ? const Center(

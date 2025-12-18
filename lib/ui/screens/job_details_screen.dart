@@ -63,7 +63,7 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
         .setJob(widget.job.id)
         .attachResume(resumeIdentifier);
 
-    // Attach bytes for web platform
+    // Web platform 
     if (kIsWeb && _resumeBytes != null) {
       builder.attachResumeBytes(_resumeBytes!);
     }
@@ -109,7 +109,6 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
       extendBodyBehindAppBar: true,
       body: Stack(
         children: [
-          // Gradient background
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -203,8 +202,7 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
                   ),
 
                   const SizedBox(height: 16),
-
-                  // Apply Button
+                  
                   ElevatedButton.icon(
                     onPressed: _apply,
                     icon: const Icon(Icons.send),

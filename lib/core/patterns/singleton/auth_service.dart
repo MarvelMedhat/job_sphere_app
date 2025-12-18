@@ -1,13 +1,12 @@
 import '../../../data/model/user.dart';
 
 class AuthService {
-  // Lazy initialization - instance is null until first access
+
   static AuthService? _instance;
   
   // Private constructor
   AuthService._internal();
 
-  // Lazy initialization getter - creates instance only when first called
   static AuthService get instance {
     if (_instance == null) {
       _instance = AuthService._internal();

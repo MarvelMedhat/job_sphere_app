@@ -12,7 +12,6 @@ class CompanyHomeScreen extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          // Gradient background
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -22,7 +21,6 @@ class CompanyHomeScreen extends StatelessWidget {
               ),
             ),
           ),
-          // Decorative circles
           Positioned(
             top: -50,
             left: -50,
@@ -80,7 +78,6 @@ class CompanyHomeScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 40),
 
-                  // Buttons
                   Expanded(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,

@@ -1,8 +1,6 @@
 import '../../../data/model/job.dart';
 import 'job_builder_interface.dart';
 
-/// Concrete Builder implementation for Job construction
-/// Implements the JobBuilderInterface to build Job objects step by step
 class JobBuilder implements JobBuilderInterface {
   String? _id;
   String? _title;
@@ -64,8 +62,6 @@ class JobBuilder implements JobBuilderInterface {
     );
   }
 
-  // Legacy methods for backward compatibility
-  // These allow existing code to continue working while transitioning to the new pattern
   JobBuilder setId(String id) {
     buildId(id);
     return this;

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/patterns/facade/auth_facade.dart';
 import '../../core/patterns/singleton/job_repository.dart';
-import '../../data/model/job.dart';
 import 'job_details_screen.dart';
 
 class ApplicantProfileScreen extends StatefulWidget {
@@ -32,6 +31,7 @@ class _ApplicantProfileScreenState extends State<ApplicantProfileScreen> {
     _phoneController = TextEditingController(text: user.phone);
   }
 
+//edit profile
   void _saveProfile() {
     if (_formKey.currentState!.validate()) {
       _authFacade.updateProfile(
@@ -57,15 +57,6 @@ class _ApplicantProfileScreenState extends State<ApplicantProfileScreen> {
         .map(
           (jobId) => jobs.firstWhere(
             (job) => job.id == jobId,
-            orElse: () => Job(
-              id: jobId,
-              title: "Unknown Job",
-              location: "",
-              description: "",
-              status: "N/A",
-              salary: "",
-              requirements: "",
-            ),
           ),
         )
         .toList();
@@ -84,7 +75,6 @@ class _ApplicantProfileScreenState extends State<ApplicantProfileScreen> {
       extendBodyBehindAppBar: true,
       body: Stack(
         children: [
-          // Gradient background
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -145,7 +135,7 @@ class _ApplicantProfileScreenState extends State<ApplicantProfileScreen> {
                                       if (value == null || value.isEmpty) {
                                         return "Enter email";
                                       }
-                                      // Validate email ending with .com
+                                      // Validate email 
                                       if (!RegExp(r'^[\w-.]+@([\w-]+\.)+com$')
                                           .hasMatch(value)) {
                                         return "Enter valid .com email";
@@ -166,7 +156,7 @@ class _ApplicantProfileScreenState extends State<ApplicantProfileScreen> {
                                       if (value == null || value.isEmpty) {
                                         return "Enter phone";
                                       }
-                                      // Validate exactly 11 digits
+                                      // Validate Phone
                                       if (!RegExp(r'^\d{11}$').hasMatch(value)) {
                                         return "Phone must be 11 digits";
                                       }
@@ -198,7 +188,6 @@ class _ApplicantProfileScreenState extends State<ApplicantProfileScreen> {
 
                   const SizedBox(height: 24),
 
-                  // Saved Jobs
                   const Text(
                     "Saved Jobs",
                     style: TextStyle(

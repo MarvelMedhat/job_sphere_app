@@ -37,11 +37,11 @@ class _CompanyJobsScreenState extends State<CompanyJobsScreen> {
   }
 
   void _deleteJob(Job job) {
-    JobRepository.instance.delete(job.id);
-    setState(() {
-      _jobs = JobRepository.instance.getCompanyJobs();
-    });
-  }
+  JobRepository.instance.removeJob(job.id);
+  setState(() {
+    _jobs = JobRepository.instance.getCompanyJobs();
+  });
+}
 
   @override
   Widget build(BuildContext context) {
@@ -62,7 +62,6 @@ class _CompanyJobsScreenState extends State<CompanyJobsScreen> {
       extendBodyBehindAppBar: true,
       body: Stack(
         children: [
-          // Gradient background
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(

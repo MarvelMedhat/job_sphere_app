@@ -5,8 +5,8 @@ class JobApplication {
   final String applicantId;
   final String jobId;
   final String? resumePath;
-  final Uint8List? resumeBytes; // File bytes for web platform
-  String status; // Pending | Interview | Rejected
+  final Uint8List? resumeBytes; 
+  String status; 
   final DateTime appliedAt;
 
   JobApplication({

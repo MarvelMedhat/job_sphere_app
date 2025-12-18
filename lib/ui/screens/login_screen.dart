@@ -15,9 +15,8 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final AuthController authController = AuthController(); // Initialize your controller
+  final AuthController authController = AuthController(); 
 
-  // Colors
   final Color primaryColor = Colors.deepPurple;
   final Color accentColor = Colors.purpleAccent;
 
@@ -62,7 +61,6 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // Gradient Background
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -72,8 +70,6 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
           ),
-
-          // Decorative Circles
           Positioned(
             top: -50,
             left: -50,
@@ -98,8 +94,6 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
           ),
-
-          // Form Card
           Center(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(24),
@@ -123,8 +117,6 @@ class _LoginScreenState extends State<LoginScreen> {
                               color: primaryColor),
                         ),
                         const SizedBox(height: 24),
-
-                        // Email Field
                         TextFormField(
                           controller: emailController,
                           decoration: InputDecoration(
@@ -143,7 +135,6 @@ class _LoginScreenState extends State<LoginScreen> {
                             if (value == null || value.isEmpty) {
                               return "Enter email";
                             }
-                            // Check valid email format and ends with .com
                             if (!RegExp(
                                         r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$')
                                     .hasMatch(value) ||
@@ -154,8 +145,6 @@ class _LoginScreenState extends State<LoginScreen> {
                           },
                         ),
                         const SizedBox(height: 16),
-
-                        // Password Field
                         TextFormField(
                           controller: passwordController,
                           decoration: InputDecoration(

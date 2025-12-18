@@ -2,8 +2,6 @@ import 'dart:typed_data';
 import '../../../data/model/job_application.dart';
 import 'job_application_builder_interface.dart';
 
-/// Concrete Builder implementation for JobApplication construction
-/// Implements the JobApplicationBuilderInterface to build JobApplication objects step by step
 class JobApplicationBuilder implements JobApplicationBuilderInterface {
   String? _id;
   String? _applicantId;
@@ -58,8 +56,6 @@ class JobApplicationBuilder implements JobApplicationBuilderInterface {
     );
   }
 
-  // Legacy methods for backward compatibility
-  // These allow existing code to continue working while transitioning to the new pattern
   JobApplicationBuilder setId(String id) {
     buildId(id);
     return this;
