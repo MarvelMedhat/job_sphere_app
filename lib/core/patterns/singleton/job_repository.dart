@@ -1,9 +1,10 @@
 import '../../../data/model/job.dart';
+import '../../patterns/singleton/UserRepository.dart';
 
 class JobRepository {
   // Lazy initialization - instance is null until first access
   static JobRepository? _instance;
-  
+
   // Private constructor
   JobRepository._internal();
 
@@ -17,25 +18,32 @@ class JobRepository {
 
   final List<Job> _jobs = [];
 
+  List<Job> get jobs => List.unmodifiable(_jobs);
+
   void addJob(Job job) => _jobs.add(job);
 
-  void removeJob(String id) =>
-      _jobs.removeWhere((job) => job.id == id);
-
-  List<Job> get jobs => _jobs;
+  void removeJob(String id) => _jobs.removeWhere((job) => job.id == id);
 
   void updateJob(Job updatedJob) {
     final index = _jobs.indexWhere((j) => j.id == updatedJob.id);
     if (index != -1) {
       _jobs[index] = updatedJob;
+
+      // Remove from savedJobs if job is paused or closed
+      if (updatedJob.status != "open") {
+        UserRepository.instance.removeJobFromAllUsers(updatedJob.id);
+      }
     }
   }
 
   void delete(String jobId) {
     _jobs.removeWhere((job) => job.id == jobId);
+
+    // Remove deleted job from all users' saved jobs
+    UserRepository.instance.removeJobFromAllUsers(jobId);
   }
 
   List<Job> getCompanyJobs() {
-  return List.unmodifiable(_jobs);
-    }
+    return List.unmodifiable(_jobs);
+  }
 }

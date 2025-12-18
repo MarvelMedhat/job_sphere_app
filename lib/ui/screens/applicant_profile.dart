@@ -13,6 +13,7 @@ class ApplicantProfileScreen extends StatefulWidget {
 
 class _ApplicantProfileScreenState extends State<ApplicantProfileScreen> {
   final AuthFacade _authFacade = AuthFacade();
+  final _formKey = GlobalKey<FormState>();
 
   bool _isEditing = false;
   late TextEditingController _nameController;
@@ -20,7 +21,6 @@ class _ApplicantProfileScreenState extends State<ApplicantProfileScreen> {
   late TextEditingController _phoneController;
 
   final Color primaryColor = Colors.deepPurple;
-  final Color accentColor = Colors.purpleAccent;
   final Color cardColor = Colors.white.withOpacity(0.95);
 
   @override
@@ -33,15 +33,19 @@ class _ApplicantProfileScreenState extends State<ApplicantProfileScreen> {
   }
 
   void _saveProfile() {
-    _authFacade.updateProfile(
-      name: _nameController.text,
-      email: _emailController.text,
-      phone: _phoneController.text,
-    );
-    setState(() => _isEditing = false);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Profile updated!")),
-    );
+    if (_formKey.currentState!.validate()) {
+      _authFacade.updateProfile(
+        name: _nameController.text,
+        email: _emailController.text,
+        phone: _phoneController.text,
+      );
+
+      setState(() => _isEditing = false);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Profile updated!")),
+      );
+    }
   }
 
   @override
@@ -74,16 +78,13 @@ class _ApplicantProfileScreenState extends State<ApplicantProfileScreen> {
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          "Profile",
-          style: TextStyle(color: Colors.white),
-        ),
+        title: const Text("Profile", style: TextStyle(color: Colors.white)),
         centerTitle: true,
       ),
       extendBodyBehindAppBar: true,
       body: Stack(
         children: [
-          // Gradient Background
+          // Gradient background
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -94,33 +95,6 @@ class _ApplicantProfileScreenState extends State<ApplicantProfileScreen> {
             ),
           ),
 
-          // Decorative Circles
-          Positioned(
-            top: -50,
-            left: -50,
-            child: Container(
-              width: 150,
-              height: 150,
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: -80,
-            right: -60,
-            child: Container(
-              width: 200,
-              height: 200,
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-            ),
-          ),
-
-          // Main Content
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -133,67 +107,106 @@ class _ApplicantProfileScreenState extends State<ApplicantProfileScreen> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
-                    child: ListTile(
-                      title: _isEditing
-                          ? TextField(
-                              controller: _nameController,
-                              decoration:
-                                  const InputDecoration(labelText: "Name"),
-                            )
-                          : Text(
-                              user.name,
-                              style: const TextStyle(fontSize: 20),
-                            ),
-                      subtitle: _isEditing
-                          ? Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                TextField(
-                                  controller: _emailController,
-                                  decoration: const InputDecoration(
-                                      labelText: "Email"),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _isEditing
+                                ? TextFormField(
+                                    controller: _nameController,
+                                    decoration: const InputDecoration(
+                                      labelText: "Name",
+                                    ),
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return "Enter name";
+                                      }
+                                      return null;
+                                    },
+                                  )
+                                : Text(
+                                    user.name,
+                                    style: const TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                            const SizedBox(height: 12),
+                            _isEditing
+                                ? TextFormField(
+                                    controller: _emailController,
+                                    decoration: const InputDecoration(
+                                      labelText: "Email",
+                                    ),
+                                    keyboardType: TextInputType.emailAddress,
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return "Enter email";
+                                      }
+                                      // Validate email ending with .com
+                                      if (!RegExp(r'^[\w-.]+@([\w-]+\.)+com$')
+                                          .hasMatch(value)) {
+                                        return "Enter valid .com email";
+                                      }
+                                      return null;
+                                    },
+                                  )
+                                : Text("Email: ${user.email}"),
+                            const SizedBox(height: 12),
+                            _isEditing
+                                ? TextFormField(
+                                    controller: _phoneController,
+                                    decoration: const InputDecoration(
+                                      labelText: "Phone",
+                                    ),
+                                    keyboardType: TextInputType.phone,
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return "Enter phone";
+                                      }
+                                      // Validate exactly 11 digits
+                                      if (!RegExp(r'^\d{11}$').hasMatch(value)) {
+                                        return "Phone must be 11 digits";
+                                      }
+                                      return null;
+                                    },
+                                  )
+                                : Text("Phone: ${user.phone}"),
+                            const SizedBox(height: 12),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: ElevatedButton(
+                                onPressed: _isEditing ? _saveProfile : () {
+                                  setState(() => _isEditing = true);
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: primaryColor,
                                 ),
-                                TextField(
-                                  controller: _phoneController,
-                                  decoration: const InputDecoration(
-                                      labelText: "Phone"),
+                                child: Text(
+                                  _isEditing ? "Save" : "Edit",
+                                  style: const TextStyle(color: Colors.white),
                                 ),
-                              ],
-                            )
-                          : Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text("Email: ${user.email}"),
-                                Text("Phone: ${user.phone}"),
-                              ],
+                              ),
                             ),
-                      trailing: IconButton(
-                        icon: Icon(
-                          _isEditing ? Icons.save : Icons.edit,
-                          color: primaryColor,
+                          ],
                         ),
-                        onPressed: () {
-                          _isEditing ? _saveProfile() : setState(() => _isEditing = true);
-                        },
                       ),
                     ),
                   ),
 
                   const SizedBox(height: 24),
 
-                  // Saved Jobs Header
+                  // Saved Jobs
                   const Text(
                     "Saved Jobs",
                     style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white),
                   ),
-
                   const SizedBox(height: 12),
-
-                  // Saved Jobs List
                   ...savedJobs.map(
                     (job) => Card(
                       color: cardColor,
@@ -216,8 +229,7 @@ class _ApplicantProfileScreenState extends State<ApplicantProfileScreen> {
                                 });
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
-                                    content: Text("Job removed from saved"),
-                                  ),
+                                      content: Text("Job removed from saved")),
                                 );
                               },
                             ),

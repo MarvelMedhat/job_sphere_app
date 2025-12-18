@@ -66,9 +66,19 @@ class AuthFacade {
     _authService.logout();
   }
 
-  void updateProfile({
-    required String name,
-    required String email,
-    required String phone,
-  }) {}
+ void updateProfile({
+  required String name,
+  required String email,
+  required String phone,
+}) {
+  final user = _authService.currentUser;
+  if (user != null) {
+    user.name = name;
+    user.email = email;
+    user.phone = phone;
+
+    // Update in repository as well
+    UserRepository.instance.updateUser(user);
+  }
+}
 }

@@ -89,14 +89,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                     const SizedBox(height: 12),
 
-                    // ✅ PHONE (NUMBERS ONLY)
                     _buildTextField(
                       phoneController,
                       "Phone",
                       keyboardType: TextInputType.phone,
-                      inputFormatters: [
-                        FilteringTextInputFormatter.digitsOnly,
-                      ],
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     ),
                     const SizedBox(height: 12),
 
@@ -110,7 +107,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ],
                       onChanged: (value) => setState(() => role = value!),
                       decoration: InputDecoration(
-                        labelStyle: const TextStyle(color: Colors.white ),
+                        labelStyle: const TextStyle(color: Colors.white),
                         filled: true,
                         fillColor: Colors.white12,
                         border: OutlineInputBorder(
@@ -186,6 +183,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
           }
           if (value.length != 11) {
             return "Phone must be 11 digits";
+          }
+        }
+
+        if (label == "Email") {
+          if (!RegExp(r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$')
+                  .hasMatch(value) ||
+              !value.endsWith(".com")) {
+            return "Enter a valid email ending with .com";
+          }
+        }
+
+        if (label == "Password") {
+          if (value.length < 6) {
+            return "Password must be at least 6 characters";
+          }
+          if (!RegExp(r'^(?=.*[A-Za-z])(?=.*\d)').hasMatch(value)) {
+            return "Password must contain letters and numbers";
           }
         }
 

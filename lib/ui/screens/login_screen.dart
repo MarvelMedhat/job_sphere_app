@@ -13,58 +13,49 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  //final AuthFacade _authFacade = AuthFacade();
-
   final TextEditingController emailController = TextEditingController();
-  
   final TextEditingController passwordController = TextEditingController();
-  final AuthController authController = AuthController(); // or however you initialize it
-
-
-  String role = 'applicant';
-
-  void login() {
-  if (_formKey.currentState!.validate()) {
-    try {
-      final user = authController.getUserByEmail(emailController.text);
-
-      if (user == null) {
-        throw Exception("User not registered");
-      }
-
-      // Get role from registered user
-      final userRole = user.role;
-
-      authController.login(
-        role: userRole,
-        email: emailController.text,
-        password: passwordController.text,
-      );
-
-      if (userRole == 'applicant') {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const ApplicantHomeScreen()),
-        );
-      } else {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const CompanyHomeScreen()),
-        );
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
-      );
-    }
-  }
-}
-
-
+  final AuthController authController = AuthController(); // Initialize your controller
 
   // Colors
   final Color primaryColor = Colors.deepPurple;
   final Color accentColor = Colors.purpleAccent;
+
+  void login() {
+    if (_formKey.currentState!.validate()) {
+      try {
+        final user = authController.getUserByEmail(emailController.text);
+
+        if (user == null) {
+          throw Exception("User not registered");
+        }
+
+        final userRole = user.role;
+
+        authController.login(
+          role: userRole,
+          email: emailController.text,
+          password: passwordController.text,
+        );
+
+        if (userRole == 'applicant') {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const ApplicantHomeScreen()),
+          );
+        } else {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const CompanyHomeScreen()),
+          );
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString())),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -132,6 +123,8 @@ class _LoginScreenState extends State<LoginScreen> {
                               color: primaryColor),
                         ),
                         const SizedBox(height: 24),
+
+                        // Email Field
                         TextFormField(
                           controller: emailController,
                           decoration: InputDecoration(
@@ -147,14 +140,22 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           keyboardType: TextInputType.emailAddress,
                           validator: (value) {
-                            if (value!.isEmpty) return "Enter email";
-                            if (!RegExp(r'\S+@\S+\.\S+').hasMatch(value)) {
-                              return "Enter valid email";
+                            if (value == null || value.isEmpty) {
+                              return "Enter email";
+                            }
+                            // Check valid email format and ends with .com
+                            if (!RegExp(
+                                        r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$')
+                                    .hasMatch(value) ||
+                                !value.endsWith(".com")) {
+                              return "Enter a valid email ending with .com";
                             }
                             return null;
                           },
                         ),
                         const SizedBox(height: 16),
+
+                        // Password Field
                         TextFormField(
                           controller: passwordController,
                           decoration: InputDecoration(
@@ -169,11 +170,18 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           ),
                           obscureText: true,
-                          validator: (value) => value!.length < 6
-                              ? "Password min 6 chars"
-                              : null,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return "Enter password";
+                            }
+                            if (value.length < 6) {
+                              return "Password must be at least 6 characters";
+                            }
+                            return null;
+                          },
                         ),
                         const SizedBox(height: 24),
+
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(
@@ -193,6 +201,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                         const SizedBox(height: 12),
+
                         TextButton(
                           onPressed: () => Navigator.push(
                             context,
